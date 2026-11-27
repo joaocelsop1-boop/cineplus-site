@@ -1,0 +1,53 @@
+# CinePlus — site de vendas no Coolify (Oracle)
+# Dois serviços, bancos SEPARADOS do app NOFLIX:
+#   app → o site PHP (este repositório)
+#   db  → MySQL 8.0 só do SITE (tabelas site_settings, plans, leads, admin_users)
+# NENHUMA porta de host é publicada (nada de "ports: - 8080:80"): o
+# Coolify/Traefik roteia o domínio para a porta 80 do container app.
+# As variáveis ${...} são preenchidas no painel do Coolify (aba Environment
+# Variables do app) — ver .env.example e DEPLOY-ORACLE.md.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # Host do banco dentro da rede Docker = nome do serviço db.
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-cineplus_site}
+      DB_USER: ${DB_USER:-cineplus}
+      DB_PASS: ${DB_PASS:?Defina DB_PASS nas variáveis de ambiente do Coolify}
+      # URL do APP CinePlus (NOFLIX) — para onde o botão "Assinar agora" leva.
+      # O app fica no MESMO domínio, no caminho /app: https://cineplus.shop/app.
+      # NÃO coloque só cineplus.shop (sem /app), senão o botão volta para o
+      # próprio site.
+      APP_URL: ${APP_URL:-https://cineplus.shop/app}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-cineplus_site}
+      MYSQL_USER: ${DB_USER:-cineplus}
+      MYSQL_PASSWORD: ${DB_PASS:?Defina DB_PASS nas variáveis de ambiente do Coolify}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Defina DB_ROOT_PASSWORD nas variáveis de ambiente do Coolify}
+    volumes:
+      # Dados do MySQL persistem no volume (sobrevivem a redeploys).
+      - cineplus_site_db:/var/lib/mysql
+      # Na PRIMEIRA subida (volume vazio), o MySQL importa o database.sql
+      # sozinho e cria as tabelas. Se o banco subir vazio, importe à mão
+      # (ver DEPLOY-ORACLE.md, passo 5).
+      - ./database.sql:/docker-entrypoint-initdb.d/01-database.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  cineplus_site_db:

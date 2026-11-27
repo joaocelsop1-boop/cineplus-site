@@ -1,0 +1,66 @@
+CINEPLUS - SITE EM PHP + MYSQL
+================================
+
+>>> PARA O ORACLE/COOLIFY (Docker): NÃO siga este arquivo — siga o
+>>> DEPLOY-ORACLE.md (mesma pasta). Este arquivo é só para o cPanel.
+
+O site é a PÁGINA DE VENDAS do app CinePlus (NOFLIX). O cliente escolhe o
+plano no site, é levado para criar a conta no app e paga via Pix lá dentro.
+O período de teste foi removido.
+
+1) CRIAR O BANCO (só na primeira instalação)
+   - No cPanel/Hostinger, abra "Bancos de dados MySQL".
+   - Crie um banco, um usuário e uma senha, e dê todas as permissões do usuário no banco.
+   - Abra o phpMyAdmin, selecione o banco, vá em "Importar" e envie o arquivo database.sql.
+
+   BANCO JÁ EXISTENTE (o site já estava no ar): NÃO reimporte o arquivo
+   inteiro (os planos seriam duplicados). Rode SÓ este comando na aba SQL
+   do phpMyAdmin:
+     ALTER TABLE `site_settings` ADD COLUMN IF NOT EXISTS `app_url` VARCHAR(255) NOT NULL DEFAULT '';
+   E troque o nome da marca direto no painel do site (Site e WhatsApp →
+   Nome da marca → CinePlus). Os planos novos (Quinzenal/Mensal/Anual)
+   podem ser ajustados no painel também, em Planos e preços.
+
+2) CONFIGURAR
+   - Abra o arquivo config.php e preencha DB_NAME, DB_USER e DB_PASS com os dados do passo 1.
+   (O config.php é incluído pelos outros arquivos; o .htaccess bloqueia acesso direto a ele.)
+   - O nome do banco (storestreaming_neonplay) é interno e NÃO precisa mudar.
+
+3) URL DO APP (para onde vai o botão "Assinar agora")
+   - O config.php já vem com APP_URL apontando para o endereço do app
+     (https://cineplus.shop/app). Se precisar trocar, faça no painel do
+     site (Site e WhatsApp → URL do app), sem editar arquivo.
+   - NÃO use só https://cineplus.shop (sem /app) — o botão voltaria
+     para o próprio site.
+   - Para deploy no Oracle/Coolify, siga o DEPLOY-ORACLE.md (este arquivo
+     é o guia do cPanel).
+
+4) ENVIAR OS ARQUIVOS
+   - No Gerenciador de Arquivos, abra a pasta public_html.
+   - Envie TODO o conteúdo deste ZIP (incluindo o arquivo oculto .htaccess) e extraia lá.
+   - Pode apagar database.sql e INSTRUCOES.txt do servidor depois de importar.
+
+5) CRIAR SEU ACESSO AO PAINEL
+   - Acesse seusite.com.br/admin/
+   - No primeiro acesso, escolha seu e-mail e uma senha (mínimo 8 caracteres).
+   - Essa será a única conta do painel.
+
+6) NO PAINEL VOCÊ PODE
+   - Mudar o nome da marca, o WhatsApp e os textos do topo.
+   - Mudar a URL do app (Site e WhatsApp → URL do app).
+   - Mudar preços, criar e remover planos e escolher o "Mais vendido".
+     ATENÇÃO: os planos do site devem ser os MESMOS do app (nome e preço),
+     senão o cliente vê um preço no site e outro no app.
+   - Ver todos os contatos de quem clicou em assinar e exportar para Excel
+     (botão "Exportar planilha").
+
+COMO FICA O FLUXO DO CLIENTE
+   1. Cliente responde o quiz (aparelho, pessoas, interesses) e deixa nome + WhatsApp.
+   2. O contato é salvo no painel do site (tabela de contatos).
+   3. O cliente é levado para o app (criar conta) com o plano já indicado.
+   4. No app ele cria a conta, paga via Pix e o acesso é liberado após a
+      confirmação do pagamento. O WhatsApp continua como alternativa de
+      contato, no botão da tela final do quiz.
+
+Requisitos: PHP 7.4 ou mais novo (recomendado 8.x) e MySQL/MariaDB.
+Use HTTPS (SSL grátis no cPanel/Hostinger) para proteger o login.

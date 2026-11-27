@@ -1,0 +1,4 @@
+# Não entra na imagem Docker.
+.git
+.env
+*.md

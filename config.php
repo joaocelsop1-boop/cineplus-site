@@ -14,7 +14,10 @@ function env_or(string $name, string $default): string {
 define('DB_HOST', env_or('DB_HOST', 'localhost'));
 define('DB_NAME', env_or('DB_NAME', 'storestreaming_neonplay'));
 define('DB_USER', env_or('DB_USER', 'storestreaming_neonplay'));
-define('DB_PASS', env_or('DB_PASS', 'n4]hKs.smoht[fJ*'));
+// A senha NÃO fica mais no código (para o repositório poder ser público,
+// igual ao do NOFLIX). No Coolify, preencha DB_PASS nas variáveis de
+// ambiente. No cPanel, preencha a senha aqui antes de subir.
+define('DB_PASS', env_or('DB_PASS', ''));
 // ==== URL DO APP CINEPLUS (NOFLIX) ====
 // O site é só a página de vendas: o botão "Assinar agora" leva o cliente
 // para criar a conta no app. A URL também pode ser trocada no painel do

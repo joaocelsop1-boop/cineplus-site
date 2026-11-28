@@ -1,6 +1,11 @@
 <?php
 require __DIR__ . '/config.php';
 $s = settings();
+// WhatsApp real de suporte do CinePlus. O banco ainda tem o placeholder
+// 5511999999999 — enquanto ele não for trocado no painel do site, usa este.
+if (only_digits($s['whatsapp'] ?? '') === '' || only_digits($s['whatsapp'] ?? '') === '5511999999999') {
+  $s['whatsapp'] = '13674779869';
+}
 $plans = plans();
 $minPrice = $plans ? min(array_map(fn($p) => (float)$p['price'], $plans)) : 0;
 $brand = $s['brand_name'] ?? 'CinePlus';
@@ -10,6 +15,26 @@ foreach ($plans as $p) { if ($minPlan === null || (float)$p['price'] < (float)$m
 $waGeneric = wa_link($s['whatsapp'] ?? '', "Oi! Vim pelo site da $brand e quero saber mais.");
 $cats = ['Lançamentos','Séries','Filmes clássicos','Desenhos','Documentários','Novelas'];
 $plansJs = array_map(fn($p) => ['name' => $p['name'], 'screens' => (int)$p['screens'], 'price' => (float)$p['price'], 'period' => $p['period'], 'highlight' => (int)$p['highlight']], $plans);
+// Custo mensal equivalente de um plano ("15 dias" -> preço*30/15;
+// "12 meses" -> preço/12). A comparação e o "Economize" usam o valor
+// mensal, não o preço do período — senão o quinzenal parece custar
+// R$ 15/mês e o anual parece custar R$ 70/mês.
+function monthly_equiv(float $price, string $period): float {
+  if (preg_match('/([\d]+(?:[.,]\d+)?)\s*dia/i', $period, $m)) {
+    $d = (float)str_replace(',', '.', $m[1]);
+    return $d > 0 ? $price * 30 / $d : $price;
+  }
+  if (preg_match('/([\d]+(?:[.,]\d+)?)\s*m[eê]s/i', $period, $m)) {
+    $mo = (float)str_replace(',', '.', $m[1]);
+    return $mo > 0 ? $price / $mo : $price;
+  }
+  if (preg_match('/([\d]+(?:[.,]\d+)?)\s*ano/i', $period, $m)) {
+    $y = (float)str_replace(',', '.', $m[1]);
+    return $y > 0 ? $price / ($y * 12) : $price;
+  }
+  return $price;
+}
+$minMonthly = $minPlan ? monthly_equiv((float)$minPlan['price'], (string)($minPlan['period'] ?? '')) : 0;
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -65,7 +90,7 @@ $plansJs = array_map(fn($p) => ['name' => $p['name'], 'screens' => (int)$p['scre
 </section>
 
 <?php $services=['Netflix Premium'=>59.9,'Disney+'=>43.9,'Max'=>34.9,'Prime Video'=>19.9,];
-$total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
+$total=array_sum($services); $save=max(0,($total-$minMonthly)*12); ?>
 <section class="pad band">
   <div class="wrap">
     <h2 class="title">Faça as contas e <span class="neon">pare de pagar caro</span></h2>
@@ -78,7 +103,7 @@ $total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
       <div class="card dark glow center-col">
         <span class="badge mid">Tudo isso incluso</span>
         <p class="label" style="color:var(--cyan)"><?= e($brand) ?></p>
-        <p class="giant neon" style="font-size:130px"><span class="cur">R$</span><?= money($minPrice) ?></p>
+        <p class="giant neon" style="font-size:130px"><span class="cur">R$</span><?= money($minMonthly) ?></p>
         <p class="muted">por mês · todos os conteúdos</p>
         <div class="save"><small>Você economiza</small><p class="display">R$ <?= money($save) ?> por ano</p></div>
       </div>
@@ -155,7 +180,7 @@ $total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
       <?php if ($p['highlight']): ?><span class="badge">Mais vendido</span><?php endif; ?>
       <h3 style="font-size:32px"><?= e($p['name']) ?></h3>
       <p class="muted" style="font-size:14px"><?= (int)$p['screens'] ?> <?= $p['screens'] > 1 ? 'telas simultâneas' : 'tela' ?></p>
-      <span class="eco">Economize R$ <?= money(max(0,($total-(float)$p['price'])*12)) ?>/ano</span>
+      <span class="eco">Economize R$ <?= money(max(0,($total-monthly_equiv((float)$p['price'], (string)$p['period']))*12)) ?>/ano</span>
       <p class="price <?= $p['highlight']?'neon':'' ?>" style="font-size:72px;margin-top:12px">R$ <?= money($p['price']) ?><span>/<?= e($p['period']) ?></span></p>
       <ul><li>Filmes e séries</li><li>Suporte no WhatsApp</li></ul>
       <a href="<?= e($appUrl . '/login?plano=' . rawurlencode($p['name'])) ?>" class="btn <?= $p['highlight'] ? 'btn-neon' : 'btn-sec' ?>" style="width:100%">Assinar agora</a>

@@ -58,7 +58,7 @@ $minMonthly = $minPlan ? monthly_equiv((float)$minPlan['price'], (string)($minPl
 </div></header>
 
 <section class="hero">
-  <img src="assets/hero-streaming.jpg" alt="Filmes e séries em alta qualidade">
+  <img src="assets/hero-moana2.jpg" alt="Filmes e séries em alta qualidade">
   <div class="fade"></div>
   <div class="wrap">
     <h1><?= e($s['headline'] ?? '') ?></h1>

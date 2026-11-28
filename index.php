@@ -8,7 +8,7 @@ $appUrl = app_url();
 $minPlan = null;
 foreach ($plans as $p) { if ($minPlan === null || (float)$p['price'] < (float)$minPlan['price']) $minPlan = $p; }
 $waGeneric = wa_link($s['whatsapp'] ?? '', "Oi! Vim pelo site da $brand e quero saber mais.");
-$cats = ['Futebol ao vivo','Lançamentos','Séries','Canais abertos','Desenhos','Novelas','Documentários','UFC & Lutas','Filmes clássicos','Esportes'];
+$cats = ['Lançamentos','Séries','Filmes clássicos','Desenhos','Documentários','Novelas'];
 $plansJs = array_map(fn($p) => ['name' => $p['name'], 'screens' => (int)$p['screens'], 'price' => (float)$p['price'], 'period' => $p['period'], 'highlight' => (int)$p['highlight']], $plans);
 ?>
 <!doctype html>
@@ -16,8 +16,8 @@ $plansJs = array_map(fn($p) => ['name' => $p['name'], 'screens' => (int)$p['scre
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= e($brand) ?> — Canais, filmes e futebol. Assine agora</title>
-<meta name="description" content="Canais ao vivo, futebol, filmes, séries e desenhos em qualquer tela. Assine e comece a assistir.">
+<title><?= e($brand) ?> — Filmes e séries. Assine agora</title>
+<meta name="description" content="Filmes e séries em qualquer tela. Assine e comece a assistir.">
 <meta property="og:title" content="<?= e($brand) ?> — Assine agora">
 <meta property="og:description" content="Descubra seu plano ideal em 30 segundos e assine agora.">
 <meta property="og:type" content="website">
@@ -33,12 +33,11 @@ $plansJs = array_map(fn($p) => ['name' => $p['name'], 'screens' => (int)$p['scre
 </div></header>
 
 <section class="hero">
-  <img src="assets/hero-streaming.jpg" alt="Sala com TV mostrando futebol, filmes e desenhos">
+  <img src="assets/hero-streaming.jpg" alt="Filmes e séries em alta qualidade">
   <div class="fade"></div>
   <div class="wrap">
-    <span class="live"><span class="dot"></span> Ao vivo agora</span>
     <h1><?= e($s['headline'] ?? '') ?></h1>
-    <p class="sub muted"><?= e($s['subheadline'] ?? '') ?></p>
+    <p class="sub muted">Filmes e séries em qualquer tela.</p>
     <div class="giant-box"><p class="lbl">A partir de</p><p class="giant neon"><span class="cur">R$</span><?= money($minPrice) ?><span class="per">/<?= e($minPlan['period'] ?? 'mês') ?></span></p></div>
     <div class="cta">
       <a href="#quiz" class="btn btn-neon btn-xl cta-pulse">⚡ Quero assinar →</a>
@@ -51,21 +50,21 @@ $plansJs = array_map(fn($p) => ['name' => $p['name'], 'screens' => (int)$p['scre
   <div class="wrap">
     <p class="eyebrow">Catálogo completo</p>
     <h2 class="title left">Tudo que você ama <span class="neon">num só lugar</span></h2>
-    <p class="muted" style="max-width:560px;margin-top:10px">+2.000 canais, +20 mil filmes e séries, campeonatos ao vivo e conteúdo infantil.</p>
+    <p class="muted" style="max-width:560px;margin-top:10px">+20 mil filmes e séries para assistir quando quiser.</p>
   </div>
   <div class="posters"><div class="ptrack">
-  <?php $posters=[['poster-futebol.jpg','Futebol ao vivo','AO VIVO',true],['poster-acao.jpg','Lançamentos de ação','4K',false],['poster-serie.jpg','Séries do momento','NOVO',false],['poster-infantil.jpg','Desenhos e animações','KIDS',false]];
+  <?php $posters=[['poster-acao.jpg','Lançamentos de ação','4K',false],['poster-serie.jpg','Séries do momento','NOVO',false],['poster-infantil.jpg','Desenhos e animações','KIDS',false]];
   foreach (array_merge($posters,$posters) as $p): ?>
     <div class="poster"><img src="assets/<?= $p[0] ?>" alt="<?= e($p[1]) ?>" loading="lazy"><div class="pf"></div>
       <span class="ptag <?= $p[3]?'live-tag':'' ?>"><?= $p[2] ?></span><p class="pt display"><?= e($p[1]) ?></p></div>
   <?php endforeach; ?>
   </div></div>
   <div class="wrap chips">
-    <?php foreach (['Brasileirão','Libertadores','Champions','UFC','F1','NBA','Novelas','Canais abertos','Documentários'] as $c): ?><span><?= $c ?></span><?php endforeach; ?>
+    <?php foreach (['Ação','Comédia','Drama','Terror','Romance','Ficção científica','Animação','Suspense','Aventura'] as $c): ?><span><?= $c ?></span><?php endforeach; ?>
   </div>
 </section>
 
-<?php $services=['Netflix Premium'=>59.9,'Premiere'=>59.9,'Disney+'=>43.9,'Max'=>34.9,'Prime Video'=>19.9,'Globoplay + canais'=>49.9];
+<?php $services=['Netflix Premium'=>59.9,'Disney+'=>43.9,'Max'=>34.9,'Prime Video'=>19.9,];
 $total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
 <section class="pad band">
   <div class="wrap">
@@ -118,8 +117,7 @@ $total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
     <div data-step="2" class="hidden">
       <p class="muted" style="font-size:14px">Pode escolher mais de um.</p>
       <div class="opts">
-        <button class="opt" data-int="Futebol"><i>⚽</i>Futebol</button>
-        <button class="opt" data-int="Filmes"><i>🎬</i>Filmes</button>
+          <button class="opt" data-int="Filmes"><i>🎬</i>Filmes</button>
         <button class="opt" data-int="Séries"><i>🍿</i>Séries</button>
         <button class="opt" data-int="Infantil"><i>🧸</i>Infantil</button>
       </div>
@@ -157,9 +155,9 @@ $total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
       <?php if ($p['highlight']): ?><span class="badge">Mais vendido</span><?php endif; ?>
       <h3 style="font-size:32px"><?= e($p['name']) ?></h3>
       <p class="muted" style="font-size:14px"><?= (int)$p['screens'] ?> <?= $p['screens'] > 1 ? 'telas simultâneas' : 'tela' ?></p>
-      <span class="eco">Economize R$ <?= money(max(0,(268.4-(float)$p['price'])*12)) ?>/ano</span>
+      <span class="eco">Economize R$ <?= money(max(0,($total-(float)$p['price'])*12)) ?>/ano</span>
       <p class="price <?= $p['highlight']?'neon':'' ?>" style="font-size:72px;margin-top:12px">R$ <?= money($p['price']) ?><span>/<?= e($p['period']) ?></span></p>
-      <ul><li>Canais, filmes e séries</li><li>Futebol e esportes</li><li>Suporte no WhatsApp</li></ul>
+      <ul><li>Filmes e séries</li><li>Suporte no WhatsApp</li></ul>
       <a href="<?= e($appUrl . '/login?plano=' . rawurlencode($p['name'])) ?>" class="btn <?= $p['highlight'] ? 'btn-neon' : 'btn-sec' ?>" style="width:100%">Assinar agora</a>
     </div>
     <?php endforeach; ?>
@@ -170,7 +168,7 @@ $total=array_sum($services); $save=max(0,($total-$minPrice)*12); ?>
   <div class="center"><div class="stars">★★★★★</div><p><b>4.9/5 · Mais de 8.500 clientes ativos</b></p>
   <h2 class="title" style="margin-top:12px">Quem assinou, <span class="neon">ficou</span></h2></div>
   <div class="grid g3" style="margin-top:48px">
-  <?php foreach ([['Carlos M.','São Paulo','Instalei na minha Smart TV LG e o jogo de ontem rodou liso, sem travar nada 🔥','21:47'],['Juliana R.','Belo Horizonte','Cancelei Netflix e Disney, aqui tem tudo e meus filhos amam os desenhos 😍','14:12'],['Rafael S.','Recife','Atendimento muito rápido, em 5 minutos já tava assistindo. Recomendo demais!','09:30']] as $r): ?>
+  <?php foreach ([['Carlos M.','São Paulo','Instalei na minha Smart TV LG e o filme de ontem rodou liso, sem travar nada 🔥','21:47'],['Juliana R.','Belo Horizonte','Cancelei Netflix e Disney, aqui tem tudo e meus filhos amam os desenhos 😍','14:12'],['Rafael S.','Recife','Atendimento muito rápido, em 5 minutos já tava assistindo. Recomendo demais!','09:30']] as $r): ?>
     <div class="wa-card"><div class="wa-h"><div class="av"><?= mb_substr($r[0],0,1) ?></div><div><b><?= $r[0] ?></b><small class="muted"><?= $r[1] ?> · online</small></div></div>
     <div class="wa-b"><div class="bubble"><?= $r[2] ?><small><?= $r[3] ?> <span style="color:var(--cyan)">✓✓</span></small></div></div></div>
   <?php endforeach; ?>
